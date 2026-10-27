@@ -203,105 +203,97 @@ header[data-testid="stHeader"] { background: transparent; }
     color: white !important;
 }
 
-/* ── Interactive Resume Sheet Styling ── */
+/* ── Industry-Standard Resume Paper Styling ── */
 .resume-paper {
     background: #ffffff;
-    color: #1e293b;
-    border-radius: 12px;
-    padding: 3rem 3.5rem;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    line-height: 1.6;
-    border-top: 6px solid #4f46e5;
-    margin: 1rem auto 2rem auto;
-    max-width: 900px;
+    color: #111827;
+    border-radius: 4px;
+    padding: 3.5rem 4rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    margin: 1rem auto 2.5rem auto;
+    max-width: 850px;
 }
 .resume-name {
-    font-size: 2.3rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    color: #0f172a;
+    color: #111827;
     letter-spacing: -0.5px;
     margin: 0;
+    text-align: center;
     text-transform: uppercase;
 }
 .resume-subtitle {
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #4f46e5;
+    color: #374151;
     margin-top: 0.2rem;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.4rem;
+    text-align: center;
 }
 .resume-contact-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.88rem;
-    color: #64748b;
-    padding-bottom: 1.2rem;
-    border-bottom: 2px solid #f1f5f9;
-    margin-bottom: 1.6rem;
+    justify-content: center;
+    gap: 0.9rem;
+    font-size: 0.86rem;
+    color: #4b5563;
+    padding-bottom: 0.9rem;
+    border-bottom: 1.5px solid #111827;
+    margin-bottom: 1.4rem;
 }
 .resume-contact-item {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
 }
 .resume-section-heading {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #111827;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.35rem;
-    margin-top: 1.6rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.resume-section-heading span.accent-bar {
-    width: 4px;
-    height: 18px;
-    background: #4f46e5;
-    border-radius: 2px;
-    display: inline-block;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 0.25rem;
+    margin-top: 1.3rem;
+    margin-bottom: 0.8rem;
 }
 .resume-item-title {
-    font-size: 1rem;
+    font-size: 0.96rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #111827;
 }
 .resume-item-subtitle {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #4f46e5;
+    font-style: italic;
+    color: #374151;
 }
 .resume-item-date {
     font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
+    color: #4b5563;
+    font-weight: 600;
 }
 .resume-bullet-list {
-    margin: 0.4rem 0 1rem 1.2rem;
+    margin: 0.35rem 0 0.9rem 1.2rem;
     padding: 0;
-    color: #334155;
-    font-size: 0.92rem;
+    color: #1f2937;
+    font-size: 0.9rem;
 }
 .resume-bullet-list li {
-    margin-bottom: 0.35rem;
-    line-height: 1.55;
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
 }
 .resume-skill-tag {
     display: inline-block;
-    background: #f1f5f9;
-    color: #334155;
+    background: #f3f4f6;
+    color: #1f2937;
     font-weight: 600;
-    font-size: 0.82rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    margin: 0.2rem 0.2rem 0.2rem 0;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    margin: 0.15rem 0.2rem 0.15rem 0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -352,77 +344,134 @@ with st.sidebar:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    resume_markdown = """# HELGE JUSTINE O. DANO
-**Cebu City, Philippines** • **Section F1** • **BS in Computer Science**  
-**Email:** contact@helgedano.dev • **Institution:** Cebu Institute of Technology University
+    # ── PDF Resume Generator ──────────────────────────────────────────────────
+    @st.cache_data
+    def generate_resume_pdf() -> bytes:
+        import io
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
 
----
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=letter, leftMargin=36, rightMargin=36, topMargin=34, bottomMargin=34)
+        story = []
+        styles = getSampleStyleSheet()
 
-### 🎯 PROFESSIONAL SUMMARY
-Goal-oriented and analytically-minded 3rd Year Computer Science student at Cebu Institute of Technology University. Strong foundations in discrete mathematics, algorithmic problem solving, and logical systems design. Proven project experience delivering native Android mobile applications with Kotlin, robust relational database architectures with MySQL/Java, and responsive modern web frontends. Passionate about applying computational logic, software engineering principles, and emerging AI technologies to solve real-world problems.
+        primary = colors.HexColor('#1E3A8A')
+        text_dark = colors.HexColor('#111827')
+        muted = colors.HexColor('#4B5563')
+        subtle_line = colors.HexColor('#CBD5E1')
 
----
+        name_style = ParagraphStyle('RName', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=21, leading=25, textColor=primary, alignment=1)
+        contact_style = ParagraphStyle('RContact', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=12, textColor=muted, alignment=1)
+        sec_head_style = ParagraphStyle('RSecHead', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=10.5, leading=14, textColor=primary, spaceBefore=6, spaceAfter=2, textTransform='uppercase')
+        job_left = ParagraphStyle('RJobL', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=9, leading=12, textColor=text_dark)
+        job_right = ParagraphStyle('RJobR', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8.5, leading=12, textColor=primary, alignment=2)
+        job_sub_left = ParagraphStyle('RJobSubL', parent=styles['Normal'], fontName='Helvetica-Oblique', fontSize=8, leading=11, textColor=muted)
+        job_sub_right = ParagraphStyle('RJobSubR', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11, textColor=muted, alignment=2)
+        bullet_style = ParagraphStyle('RBullet', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=11.5, textColor=text_dark, leftIndent=12, firstLineIndent=-8, spaceAfter=1.5)
+        summary_style = ParagraphStyle('RSummary', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=12, textColor=text_dark)
+        skill_lbl = ParagraphStyle('RSkillLbl', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8.5, leading=11.5, textColor=text_dark)
+        skill_val = ParagraphStyle('RSkillVal', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=11.5, textColor=text_dark)
 
-### 🛠️ TECHNICAL & CORE SKILLS
-- **Programming & Scripting:** Kotlin, Java, Python, JavaScript, HTML5, CSS3, SQL
-- **Frameworks & Developer Tools:** Android SDK, Streamlit, Git, GitHub, MySQL, Relational Database Modeling
-- **Core Competencies:** Logical Thinking, Algorithm Design, Data Structures, Mathematical Modeling, Problem Solving, Full-Stack Collaboration
+        # Header
+        story.append(Paragraph('HELGE JUSTINE O. DANO', name_style))
+        story.append(Spacer(1, 2))
+        story.append(Paragraph('Cebu City, Philippines &nbsp;&bull;&nbsp; Section F1 &nbsp;&bull;&nbsp; BS Computer Science &nbsp;&bull;&nbsp; CIT-U &nbsp;&bull;&nbsp; github.com/Helge-Dano', contact_style))
+        story.append(Spacer(1, 4))
+        story.append(HRFlowable(width='100%', thickness=1.2, color=primary, spaceBefore=0, spaceAfter=4))
 
----
+        # Professional Summary
+        story.append(Paragraph('PROFESSIONAL SUMMARY', sec_head_style))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=subtle_line, spaceBefore=1, spaceAfter=3))
+        story.append(Paragraph('Goal-oriented and analytical 3rd Year Computer Science student at Cebu Institute of Technology University (CIT-U) with strong foundations in discrete mathematics, algorithmic problem-solving, and system design. Proven project experience delivering native Android mobile applications with Kotlin, engineering robust relational database backends with MySQL and Java, and constructing responsive web frontends. Passionate about applying computational principles and emerging AI technologies to develop reliable, human-centric software.', summary_style))
+        story.append(Spacer(1, 3))
 
-### 💼 FEATURED PROJECTS
+        # Education
+        story.append(Paragraph('EDUCATION', sec_head_style))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=subtle_line, spaceBefore=1, spaceAfter=3))
+        edu_table = Table([
+            [Paragraph('<b>Cebu Institute of Technology University (CIT-U)</b>', job_left), Paragraph('Cebu City, Philippines', job_right)],
+            [Paragraph('Bachelor of Science in Computer Science (BSCS) &bull; Section F1', job_sub_left), Paragraph('Expected 2026 &bull; 3rd Year', job_sub_right)]
+        ], colWidths=[380, 160])
+        edu_table.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0)]))
+        story.append(edu_table)
+        story.append(Spacer(1, 1.5))
+        story.append(Paragraph('<b>Relevant Coursework:</b> Data Structures &amp; Algorithms, Object-Oriented Programming, Database Management Systems, Discrete Mathematics, Software Engineering, Applied Artificial Intelligence (CSIT 349 Section F1).', bullet_style))
+        story.append(Spacer(1, 3))
 
-#### **CampusFix — Campus Maintenance & Issue Reporting System**
-*Role: Solo Developer | Stack: Kotlin, Android SDK, SQLite/Firebase*
-- Spearheaded the complete conceptualization, UI/UX workflow, and native Android implementation of an incident-reporting application for university facilities.
-- Integrated photo attachment, incident status lifecycle tracking, and administrative alerts to streamline campus issue resolution.
-- Enforced clean architecture patterns and modular component design for responsive mobile performance.
+        # Technical Skills
+        story.append(Paragraph('TECHNICAL &amp; CORE SKILLS', sec_head_style))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=subtle_line, spaceBefore=1, spaceAfter=3))
+        skills_table = Table([
+            [Paragraph('<b>Programming Languages:</b>', skill_lbl), Paragraph('Kotlin, Java, Python, JavaScript (ES6+), SQL, HTML5, CSS3', skill_val)],
+            [Paragraph('<b>Tools &amp; Frameworks:</b>', skill_lbl), Paragraph('Android SDK, Streamlit, MySQL, Git, GitHub, VS Code', skill_val)],
+            [Paragraph('<b>Core Competencies:</b>', skill_lbl), Paragraph('Logical Thinking, Algorithmic Problem Solving, Mathematical Modeling, Database Normalization (3NF), Full-Stack Collaboration', skill_val)],
+        ], colWidths=[140, 400])
+        skills_table.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 1)]))
+        story.append(skills_table)
+        story.append(Spacer(1, 3))
 
-#### **OnlyCodes — Collaborative Developer Platform & Repository**
-*Role: Database Developer | Stack: Java, SQL, MySQL, JDBC*
-- Architected the normalized relational database schema (3NF) to support user credentials, code submissions, interaction logs, and access control.
-- Authored optimized SQL queries, indexing routines, and transactional triggers to ensure strict ACID compliance and high-throughput query handling.
-- Integrated database services seamlessly with backend Java controllers.
+        # Featured Projects
+        story.append(Paragraph('FEATURED PROJECTS', sec_head_style))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=subtle_line, spaceBefore=1, spaceAfter=3))
 
-#### **Project NOPE — Interactive Modern Web Application**
-*Role: Frontend Developer | Stack: HTML5, CSS3, JavaScript (ES6+)*
-- Developed responsive, cross-browser user interfaces focusing on accessibility, fluid layout systems, and intuitive micro-interactions.
-- Collaborated closely in an agile team workflow to connect presentation components to upstream application APIs.
+        # CampusFix
+        t_cf = Table([
+            [Paragraph('<b>CampusFix &mdash; Campus Maintenance &amp; Incident Reporting Mobile App</b>', job_left), Paragraph('Solo Developer', job_right)],
+            [Paragraph('<i>Stack: Kotlin, Android SDK, SQLite, Material Design</i>', job_sub_left), Paragraph('Mobile App', job_sub_right)]
+        ], colWidths=[380, 160])
+        t_cf.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0)]))
+        story.append(t_cf)
+        story.append(Paragraph('&bull; Conceptualized, designed, and developed an end-to-end native Android mobile app for students and faculty to submit campus maintenance tickets and repair requests.', bullet_style))
+        story.append(Paragraph('&bull; Engineered incident image uploads, categorized issue reporting, and real-time status lifecycle tracking to accelerate administrative triage.', bullet_style))
+        story.append(Paragraph('&bull; Enforced clean mobile architectural patterns guaranteeing fluid UI responsiveness across diverse screen sizes and Android OS versions.', bullet_style))
+        story.append(Spacer(1, 2.5))
 
----
+        # OnlyCodes
+        t_oc = Table([
+            [Paragraph('<b>OnlyCodes &mdash; Collaborative Developer Code Sharing Platform</b>', job_left), Paragraph('Database Developer', job_right)],
+            [Paragraph('<i>Stack: Java, SQL, MySQL, Relational Database Modeling, JDBC</i>', job_sub_left), Paragraph('Team Project', job_sub_right)]
+        ], colWidths=[380, 160])
+        t_oc.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0)]))
+        story.append(t_oc)
+        story.append(Paragraph('&bull; Spearheaded relational database architecture and normalization (up to 3NF) for high-concurrency developer code sharing and snippet retrieval.', bullet_style))
+        story.append(Paragraph('&bull; Authored optimized SQL queries, indexing routines, and transactional triggers adhering to strict ACID properties.', bullet_style))
+        story.append(Paragraph('&bull; Seamlessly integrated data access services with Java controllers to facilitate low-latency database connection pooling.', bullet_style))
+        story.append(Spacer(1, 2.5))
 
-### 🎓 EDUCATION
-**Cebu Institute of Technology University (CIT-U)** — *Cebu City, Philippines*  
-**Bachelor of Science in Computer Science (BSCS)** | Class of 2026 (3rd Year Student)  
-- Focus: Algorithms, Discrete Structures, Database Systems, Software Engineering, Applied Artificial Intelligence (CSIT 349)
-- Section: F1
+        # Project NOPE
+        t_pn = Table([
+            [Paragraph('<b>Project NOPE &mdash; Interactive Modern Web Application</b>', job_left), Paragraph('Frontend Developer', job_right)],
+            [Paragraph('<i>Stack: HTML5, CSS3, JavaScript (ES6+), Responsive UI</i>', job_sub_left), Paragraph('Team Project', job_sub_right)]
+        ], colWidths=[380, 160])
+        t_pn.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 0), ('RIGHTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 0), ('BOTTOMPADDING', (0,0), (-1,-1), 0)]))
+        story.append(t_pn)
+        story.append(Paragraph('&bull; Developed user-facing layout components and micro-interactions utilizing semantic HTML5, modern CSS flexbox/grid, and vanilla JavaScript.', bullet_style))
+        story.append(Paragraph('&bull; Guaranteed cross-device responsiveness, fast page rendering, and seamless user interaction design across desktop and mobile screens.', bullet_style))
+        story.append(Paragraph('&bull; Collaborated through Git feature branching and agile workflows to coordinate interface bindings with upstream API services.', bullet_style))
+        story.append(Spacer(1, 3))
 
----
+        # Achievements & Background
+        story.append(Paragraph('ACHIEVEMENTS &amp; MILESTONES', sec_head_style))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=subtle_line, spaceBefore=1, spaceAfter=3))
+        story.append(Paragraph('&bull; <b>Mathematical Logic to Engineering:</b> Discovered a strong early passion for mathematics and logical reasoning, successfully transferring those talents into software engineering and computational algorithms.', bullet_style))
+        story.append(Paragraph('&bull; <b>Academic Development:</b> Active in collegiate programming tasks, group software engineering workflows, and applied artificial intelligence coursework at CIT-U.', bullet_style))
 
-### 🏆 MILESTONES & ACTIVITIES
-- Successfully relocated from Tisa to Bulacao, Cebu City through family home construction.
-- Active contributor to collegiate technical coursework and software innovation initiatives.
-- Mathematical and analytical problem-solving focus transitioned into practical software engineering.
-"""
+        doc.build(story)
+        return buf.getvalue()
 
-    st.markdown("**📄 Resume Downloads**")
-    dl_col1, dl_col2 = st.columns(2)
-    with dl_col1:
-        st.download_button(
-            label="📥 Download .MD",
-            data=resume_markdown,
-            file_name="Helge_Justine_Dano_Resume.md",
-            mime="text/markdown",
-            use_container_width=True,
-        )
-    with dl_col2:
-        st.download_button(
-            label="📄 Download .TXT",
-            data=resume_markdown,
-            file_name="Helge_Justine_Dano_Resume.txt",
-            mime="text/plain",
-            use_container_width=True,
-        )
+    pdf_resume_bytes = generate_resume_pdf()
+
+    st.markdown("**📄 Official Resume**")
+    st.download_button(
+        label="📥 Download Resume (PDF)",
+        data=pdf_resume_bytes,
+        file_name="Helge_Justine_Dano_Resume.pdf",
+        mime="application/pdf",
+        use_container_width=True,
+    )
 
 # ── Hero Banner ───────────────────────────────────────────────────────────────
 st.markdown("""
@@ -729,145 +778,137 @@ with tab5:
     r_head_col, r_btn_col = st.columns([3, 2])
     with r_head_col:
         st.markdown("<div class='section-title' style='font-size:1.8rem;'>📄 Curriculum Vitae / Resume</div>", unsafe_allow_html=True)
-        st.caption("A clean, industry-standard resume formatted for software engineering internships and roles.")
+        st.caption("Standard 1-page software engineer resume. Ready to view and download as PDF.")
     with r_btn_col:
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        rc1, rc2 = st.columns(2)
-        with rc1:
-            st.download_button(
-                label="📥 Download .MD",
-                data=resume_markdown,
-                file_name="Helge_Justine_Dano_Resume.md",
-                mime="text/markdown",
-                use_container_width=True,
-                key="resume_tab_md"
-            )
-        with rc2:
-            st.download_button(
-                label="📄 Download .TXT",
-                data=resume_markdown,
-                file_name="Helge_Justine_Dano_Resume.txt",
-                mime="text/plain",
-                use_container_width=True,
-                key="resume_tab_txt"
-            )
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.download_button(
+            label="📥 Download Official Resume (PDF)",
+            data=pdf_resume_bytes,
+            file_name="Helge_Justine_Dano_Resume.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+            key="resume_tab_pdf_main"
+        )
 
-    import textwrap
     resume_raw_html = """<div class='resume-paper'>
-<div style='display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;'>
-<div>
-<h1 class='resume-name'>Helge Justine O. Dano</h1>
-<div class='resume-subtitle'>Aspiring Software Engineer &bull; Computer Science Undergrad</div>
-</div>
-<div style='text-align:right;'>
-<span style='background:#e0e7ff; color:#3730a3; font-weight:700; font-size:0.8rem; padding:0.35rem 0.8rem; border-radius:999px;'>
-Section F1 &bull; CSIT 349
-</span>
-</div>
-</div>
+<!-- Header -->
+<div class='resume-name'>Helge Justine O. Dano</div>
+<div class='resume-subtitle'>Aspiring Software Engineer &bull; Computer Science Undergraduate</div>
 <div class='resume-contact-bar'>
 <span class='resume-contact-item'>📍 Cebu City, Philippines</span>
-<span class='resume-contact-item'>🎓 Cebu Institute of Technology University</span>
+<span class='resume-contact-item'>🏫 Cebu Institute of Technology University</span>
+<span class='resume-contact-item'>🏷️ Section F1 &bull; CSIT 349</span>
 <span class='resume-contact-item'>✉️ contact@helgedano.dev</span>
 <span class='resume-contact-item'>🔗 github.com/Helge-Dano</span>
 </div>
-<div class='resume-section-heading'><span class='accent-bar'></span> Professional Summary</div>
-<p style='color:#334155; font-size:0.93rem; margin:0; line-height:1.65;'>
-Goal-oriented and analytical 3rd Year Computer Science student at Cebu Institute of Technology University with a strong affinity for discrete logic, mathematics, and structured problem-solving. Proven project experience delivering native Android mobile applications with Kotlin, engineering robust relational database backends with MySQL/Java, and constructing responsive web frontends. Passionate about applying computational principles and AI to create reliable, human-centric software.
+
+<!-- Professional Summary -->
+<div class='resume-section-heading'>Professional Summary</div>
+<p style='color:#1f2937; font-size:0.91rem; margin:0; line-height:1.6;'>
+Goal-oriented and analytical 3rd Year Computer Science student at Cebu Institute of Technology University with strong foundations in discrete mathematics, algorithmic problem-solving, and logical systems design. Proven project experience delivering native Android mobile applications with Kotlin, engineering robust relational database backends with MySQL and Java, and constructing responsive web frontends. Passionate about applying computational principles and emerging AI technologies to develop reliable, human-centric software.
 </p>
-<div class='resume-section-heading'><span class='accent-bar'></span> Technical &amp; Core Competencies</div>
-<div style='display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:0.75rem; font-size:0.9rem; color:#334155;'>
+
+<!-- Education -->
+<div class='resume-section-heading'>Education</div>
+<div style='display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap;'>
 <div>
-<strong>Programming Languages:</strong><br>
+<span class='resume-item-title'>Cebu Institute of Technology University (CIT-U)</span><br>
+<span class='resume-item-subtitle'>Bachelor of Science in Computer Science (BSCS) &bull; Section F1</span>
+</div>
+<div style='text-align:right;'>
+<span class='resume-item-date'>Cebu City, Philippines</span><br>
+<span class='resume-item-date' style='color:#1e3a8a;'>Expected Graduation: 2026</span>
+</div>
+</div>
+<div style='font-size:0.87rem; color:#4b5563; margin-top:0.35rem;'>
+<strong>Relevant Coursework:</strong> Data Structures &amp; Algorithms, Object-Oriented Programming, Database Management Systems, Discrete Mathematics, Software Engineering, Applied Artificial Intelligence (CSIT 349).
+</div>
+
+<!-- Technical Skills -->
+<div class='resume-section-heading'>Technical Skills</div>
+<div style='font-size:0.9rem; color:#1f2937;'>
+<div style='margin-bottom:0.3rem;'>
+<strong>Programming Languages:</strong> 
 <span class='resume-skill-tag'>Kotlin</span>
 <span class='resume-skill-tag'>Java</span>
-<span class='resume-skill-tag'>SQL</span>
-<span class='resume-skill-tag'>JavaScript</span>
-<span class='resume-skill-tag'>HTML5/CSS3</span>
 <span class='resume-skill-tag'>Python</span>
+<span class='resume-skill-tag'>JavaScript (ES6+)</span>
+<span class='resume-skill-tag'>SQL</span>
+<span class='resume-skill-tag'>HTML5</span>
+<span class='resume-skill-tag'>CSS3</span>
 </div>
-<div>
-<strong>Tools &amp; Environments:</strong><br>
+<div style='margin-bottom:0.3rem;'>
+<strong>Tools &amp; Frameworks:</strong> 
 <span class='resume-skill-tag'>Android SDK</span>
-<span class='resume-skill-tag'>MySQL</span>
 <span class='resume-skill-tag'>Streamlit</span>
+<span class='resume-skill-tag'>MySQL</span>
 <span class='resume-skill-tag'>Git / GitHub</span>
 <span class='resume-skill-tag'>VS Code</span>
 </div>
-<div style='grid-column: 1 / -1;'>
-<strong>Core Strengths:</strong><br>
-<span class='resume-skill-tag'>Logical Thinking</span>
-<span class='resume-skill-tag'>Algorithmic Problem Solving</span>
-<span class='resume-skill-tag'>Mathematical Modeling</span>
-<span class='resume-skill-tag'>Database Normalization (3NF)</span>
-<span class='resume-skill-tag'>Full-Stack Collaboration</span>
+<div>
+<strong>Core Competencies:</strong> Logical Thinking, Algorithmic Problem Solving, Mathematical Modeling, Database Normalization (3NF), Full-Stack Collaboration
 </div>
 </div>
-<div class='resume-section-heading'><span class='accent-bar'></span> Featured Projects</div>
-<div style='margin-bottom:1.1rem;'>
+
+<!-- Featured Projects -->
+<div class='resume-section-heading'>Featured Projects</div>
+
+<!-- Project 1 -->
+<div style='margin-bottom:1rem;'>
 <div style='display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap;'>
 <div>
 <span class='resume-item-title'>CampusFix</span> &mdash; 
 <span class='resume-item-subtitle'>Campus Maintenance &amp; Incident Reporting Mobile App</span>
 </div>
-<div class='resume-item-date'>Solo Project</div>
+<div class='resume-item-date'>Solo Developer &bull; Android</div>
 </div>
-<div style='font-size:0.83rem; color:#6366f1; font-weight:600; margin-top:0.1rem;'>Stack: Kotlin, Android SDK, SQLite, Material Design</div>
+<div style='font-size:0.82rem; color:#4b5563; font-style:italic; margin-top:0.1rem;'>Tech Stack: Kotlin, Android SDK, SQLite, Material Design</div>
 <ul class='resume-bullet-list'>
-<li>Engineered an end-to-end native Android application allowing university students and faculty to submit maintenance tickets and facility repair requests directly to campus admin.</li>
-<li>Designed an intuitive reporting pipeline featuring image attachment, categorized tagging, and real-time incident status tracking.</li>
-<li>Implemented clean architecture patterns to guarantee responsive rendering across varied Android screen sizes and OS versions.</li>
+<li>Conceptualized, designed, and developed an end-to-end native Android application for students and faculty to submit campus maintenance tickets and repair requests directly to administrative teams.</li>
+<li>Engineered incident image uploads, categorized issue reporting, and real-time status lifecycle tracking to accelerate ticket triage and resolution.</li>
+<li>Enforced clean mobile architectural patterns guaranteeing fluid UI responsiveness across diverse screen sizes and Android OS versions.</li>
 </ul>
 </div>
-<div style='margin-bottom:1.1rem;'>
+
+<!-- Project 2 -->
+<div style='margin-bottom:1rem;'>
 <div style='display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap;'>
 <div>
 <span class='resume-item-title'>OnlyCodes</span> &mdash; 
-<span class='resume-item-subtitle'>Collaborative Code Sharing &amp; Developer Repository</span>
+<span class='resume-item-subtitle'>Collaborative Developer Code Sharing Platform</span>
 </div>
-<div class='resume-item-date'>Team Project</div>
+<div class='resume-item-date'>Database Developer &bull; Team</div>
 </div>
-<div style='font-size:0.83rem; color:#6366f1; font-weight:600; margin-top:0.1rem;'>Stack: Java, MySQL, Relational Database Modeling, JDBC</div>
+<div style='font-size:0.82rem; color:#4b5563; font-style:italic; margin-top:0.1rem;'>Tech Stack: Java, SQL, MySQL, Relational Database Modeling, JDBC</div>
 <ul class='resume-bullet-list'>
-<li>Spearheaded relational database schema design, normalization (up to 3NF), and query optimization for high-concurrency developer operations.</li>
-<li>Implemented stored routines, indexing strategies, and transactional integrity mechanisms adhering to strict ACID properties.</li>
-<li>Seamlessly integrated data access layers with Java backend business logic to facilitate low-latency code snippet retrieval.</li>
+<li>Spearheaded relational database architecture and normalization (up to 3NF) for high-concurrency developer code sharing and snippet retrieval.</li>
+<li>Authored optimized SQL queries, indexing routines, and transactional triggers adhering to strict ACID properties.</li>
+<li>Seamlessly integrated data access services with Java controllers to facilitate low-latency database connection pooling.</li>
 </ul>
 </div>
+
+<!-- Project 3 -->
 <div style='margin-bottom:0.5rem;'>
 <div style='display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap;'>
 <div>
 <span class='resume-item-title'>Project NOPE</span> &mdash; 
 <span class='resume-item-subtitle'>Interactive Modern Web Application</span>
 </div>
-<div class='resume-item-date'>Team Project</div>
+<div class='resume-item-date'>Frontend Developer &bull; Team</div>
 </div>
-<div style='font-size:0.83rem; color:#6366f1; font-weight:600; margin-top:0.1rem;'>Stack: HTML5, CSS3, JavaScript (ES6+)</div>
+<div style='font-size:0.82rem; color:#4b5563; font-style:italic; margin-top:0.1rem;'>Tech Stack: HTML5, CSS3, JavaScript (ES6+), Responsive Design</div>
 <ul class='resume-bullet-list'>
-<li>Led frontend development, drafting modular UI components, fluid flex/grid layouts, and responsive interaction design from scratch.</li>
-<li>Streamlined cross-device layout consistency and integrated micro-animations to enhance user engagement.</li>
-<li>Collaborated via Git-based feature branching to connect client interfaces with backend service endpoints.</li>
+<li>Developed user-facing layout components and micro-interactions utilizing semantic HTML5, modern CSS flexbox/grid, and vanilla JavaScript.</li>
+<li>Guaranteed cross-device responsiveness, fast page rendering, and seamless user interaction design across desktop and mobile screens.</li>
+<li>Collaborated through Git feature branching and agile workflows to coordinate interface bindings with upstream API services.</li>
 </ul>
 </div>
-<div class='resume-section-heading'><span class='accent-bar'></span> Education</div>
-<div style='display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap;'>
-<div>
-<span class='resume-item-title'>Cebu Institute of Technology University (CIT-U)</span><br>
-<span class='resume-item-subtitle' style='color:#334155;'>Bachelor of Science in Computer Science (BSCS)</span>
-</div>
-<div style='text-align:right;'>
-<span class='resume-item-date'>Cebu City, Philippines</span><br>
-<span class='resume-item-date' style='font-weight:600; color:#4f46e5;'>Expected 2026 &bull; 3rd Year</span>
-</div>
-</div>
-<div style='font-size:0.85rem; color:#64748b; margin-top:0.4rem;'>
-Relevant Coursework: Data Structures &amp; Algorithms, Object-Oriented Programming, Database Management Systems, Discrete Mathematics, Software Engineering, Applied Artificial Intelligence (CSIT 349 Section F1).
-</div>
-<div class='resume-section-heading'><span class='accent-bar'></span> Background &amp; Milestones</div>
+
+<!-- Achievements & Milestones -->
+<div class='resume-section-heading'>Achievements &amp; Milestones</div>
 <ul class='resume-bullet-list' style='margin-bottom:0;'>
-<li><strong>Origin &amp; Foundation:</strong> Born and raised in Cebu City; transitioned from renting in Tisa to establishing a permanent family residence in Bulacao.</li>
-<li><strong>Analytical Mindset:</strong> Discovered a deep passion for mathematics and logical thinking early in academic life, successfully channeling that drive into software engineering and computational sciences.</li>
-<li><strong>Academic Community:</strong> Active participant in CIT-U student tech projects, collaborative team systems, and applied AI coursework.</li>
+<li><strong>Mathematical Logic to Engineering:</strong> Discovered a strong early passion for mathematics and logical reasoning, successfully transferring those talents into software engineering and computational algorithms.</li>
+<li><strong>Academic Development:</strong> Active in collegiate programming tasks, group software engineering workflows, and applied artificial intelligence coursework at CIT-U.</li>
 </ul>
 </div>"""
     st.markdown(resume_raw_html, unsafe_allow_html=True)
